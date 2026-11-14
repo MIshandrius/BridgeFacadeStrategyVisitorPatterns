@@ -5,6 +5,8 @@ import org.example.Bridge.Art.IArt;
 import org.example.Bridge.ObjectType.IObjectFormat;
 import org.example.Bridge.Price.IPrice;
 import org.example.Visitor.IArtVisitor;
+import org.example.Observer.ArtworkAddedEvent;
+import org.example.Observer.ArtworkObserver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +16,13 @@ public abstract class Exhibition {
 
     private final String title;
     private final List<IArt> artworks;
+    private final List<ArtworkObserver> observers =
+            new ArrayList<>();
 
     protected IPrice price;
     protected double priceUsd;
     protected IObjectFormat form;
 
-    // New constructor supporting multiple artworks
     protected Exhibition(
             String title,
             List<IArt> artworks,
@@ -49,7 +52,6 @@ public abstract class Exhibition {
         );
     }
 
-    // Original constructor for Gallery
     protected Exhibition(
             IArt artwork,
             IPrice price,
@@ -60,7 +62,6 @@ public abstract class Exhibition {
         configurePrice(price, priceUsd);
     }
 
-    // Original constructor for Museum
     protected Exhibition(
             IArt artwork,
             IObjectFormat form
@@ -95,6 +96,45 @@ public abstract class Exhibition {
     public int getArtworkCount() {
         return artworks.size();
     }
+
+    public void registerObserver(ArtworkObserver observer) {
+        Objects.requireNonNull(
+                observer,
+                "Observer must not be null"
+        );
+
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+
+    public void removeObserver(ArtworkObserver observer) {
+        observers.remove(observer);
+    }
+
+    public void addArtwork(IArt artwork) {
+
+        artworks.add(
+                Objects.requireNonNull(
+                        artwork,
+                        "Artwork must not be null"
+                )
+        );
+
+        ArtworkAddedEvent event =
+                new ArtworkAddedEvent(
+                        title,
+                        artwork,
+                        artworks.size()
+                );
+
+        for (ArtworkObserver observer :
+                List.copyOf(observers)) {
+
+            observer.onArtworkAdded(event);
+        }
+    }
+
 
     public void setFormat(IObjectFormat form) {
         this.form = Objects.requireNonNull(
