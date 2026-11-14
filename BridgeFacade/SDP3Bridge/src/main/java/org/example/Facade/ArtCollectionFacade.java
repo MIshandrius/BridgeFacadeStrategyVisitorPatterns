@@ -2,9 +2,9 @@ package org.example.Facade;
 
 import java.util.List;
 
-import org.example.Art.IArt;
-import org.example.Art.Painting;
-import org.example.Art.Sculpture;
+import org.example.Bridge.Art.IArt;
+import org.example.Bridge.Art.Painting;
+import org.example.Bridge.Art.Sculpture;
 import org.example.Visitor.IArtVisitor;
 import org.example.Visitor.PackingVisitor;
 import org.example.Visitor.CatalogVisitor;

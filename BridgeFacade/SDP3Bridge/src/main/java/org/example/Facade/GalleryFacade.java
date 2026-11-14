@@ -1,13 +1,13 @@
 package org.example.Facade;
 
-import org.example.Art.Painting;
-import org.example.Exhibition.Gallery;
-import org.example.ObjectType.Physical;
-import org.example.ObjectType.Virtual;
-import org.example.Price.IPrice;
-import org.example.Price.PriceEur;
-import org.example.Price.PriceKzt;
-import org.example.Price.PriceUsd;
+import org.example.Bridge.Art.Painting;
+import org.example.Bridge.Exhibition.Gallery;
+import org.example.Bridge.ObjectType.Physical;
+import org.example.Bridge.ObjectType.Virtual;
+import org.example.Bridge.Price.IPrice;
+import org.example.Bridge.Price.PriceEur;
+import org.example.Bridge.Price.PriceKzt;
+import org.example.Bridge.Price.PriceUsd;
 
 import org.example.Strategy.IPricingStrategy;
 import org.example.Visitor.PackingVisitor;

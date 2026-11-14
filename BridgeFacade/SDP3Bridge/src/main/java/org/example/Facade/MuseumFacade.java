@@ -1,10 +1,10 @@
 package org.example.Facade;
 
-import org.example.Art.Sculpture;
-import org.example.Exhibition.Exhibition;
-import org.example.Exhibition.Museum;
-import org.example.ObjectType.Physical;
-import org.example.ObjectType.Virtual;
+import org.example.Bridge.Art.Sculpture;
+import org.example.Bridge.Exhibition.Exhibition;
+import org.example.Bridge.Exhibition.Museum;
+import org.example.Bridge.ObjectType.Physical;
+import org.example.Bridge.ObjectType.Virtual;
 import org.example.Visitor.PackingVisitor;
 
 public class MuseumFacade {

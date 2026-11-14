@@ -1,9 +1,7 @@
 package org.example.Visitor;
 
-import org.example.Art.Painting;
-import org.example.Art.Sculpture;
-
-import java.awt.*;
+import org.example.Bridge.Art.Painting;
+import org.example.Bridge.Art.Sculpture;
 
 public class PackingVisitor implements IArtVisitor {
     @Override

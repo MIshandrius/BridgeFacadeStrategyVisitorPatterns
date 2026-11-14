@@ -1,7 +1,7 @@
 package org.example.Visitor;
 
-import org.example.Art.Painting;
-import org.example.Art.Sculpture;
+import org.example.Bridge.Art.Painting;
+import org.example.Bridge.Art.Sculpture;
 
 public class CatalogVisitor implements IArtVisitor{
     @Override
