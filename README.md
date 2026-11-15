@@ -1,48 +1,194 @@
-# Art Exhibition — Bridge, Facade, Strategy and Visitor
+# Art Exhibition — Design Patterns Final Project
 
-Java project demonstrating four design patterns in an art exhibition system.
+Java application demonstrating six design patterns: **Bridge, Facade, Strategy, Visitor, Builder, and Observer**.
 
-The application presents paintings and sculptures, supports physical and virtual
-presentation formats, applies different pricing algorithms, and performs operations
-on an artwork collection using Visitor.
+The application manages art exhibitions containing paintings and sculptures. It supports physical and virtual presentation formats, interchangeable pricing strategies, artwork operations, exhibition construction, and notifications when new artworks are added.
 
 ## Requirements
 
 - JDK 25
 - IntelliJ IDEA or Maven
+- JUnit 5 for automated testing
 
 ## Running the Application
 
-Open the project in IntelliJ IDEA and run:
+Open the Maven project located at:
 
-```text
-org.example.Main
-```
+`BridgeFacade/SDP3Bridge`
 
-Alternatively, open a terminal in the directory containing `pom.xml`:
+Run `org.example.Main` in IntelliJ IDEA.
+
+Alternatively, open a terminal in the directory containing `pom.xml` and execute:
 
 ```bash
-mvn compile
-mvn exec:java -Dexec.mainClass=org.example.Main
+mvn clean compile
+mvn exec:java
+```
+
+To run the automated tests:
+
+```bash
+mvn clean test
 ```
 
 ## Design Patterns
 
-| Pattern | Purpose | Main components |
-|---|---|---|
-| Bridge | Separates exhibition abstractions from artwork and presentation implementations | Exhibition, Gallery, Museum, IArt, IObjectFormat |
-| Facade | Provides simple commands for exhibition and collection operations | GalleryFacade, MuseumFacade, ArtCollectionFacade |
-| Strategy | Provides interchangeable price calculation algorithms | PricingStrategy, RegularPricing, DiscountPricing, CommissionPricing, FixedDiscountPricing |
-| Visitor | Separates operations from the artwork classes | ArtVisitor, PackingVisitor, CatalogVisitor, ConservationVisitor |
+The application implements six design patterns from all three required categories.
 
-## Visitor Implementation
+| Pattern | Category | Purpose | Main Components |
+|---|---|---|---|
+| Bridge | Structural | Separates exhibition types from presentation formats | Exhibition, Gallery, Museum, IObjectFormat, Physical, Virtual |
+| Facade | Structural | Simplifies exhibition and artwork collection operations | GalleryFacade, MuseumFacade, ArtCollectionFacade |
+| Strategy | Behavioral | Provides interchangeable pricing algorithms | IPricingStrategy, RegularIPricing, DiscountIPricing, CommissionIPricing, FixedDiscountIPricing |
+| Visitor | Behavioral | Separates artwork operations from artwork classes | IArtVisitor, PackingVisitor, CatalogVisitor, ConservationVisitor |
+| Builder | Creational | Constructs exhibitions with required and optional settings | ExhibitionBuilder, Gallery |
+| Observer | Behavioral | Notifies registered listeners about artwork additions | ArtworkObserver, ArtworkAddedEvent, ActivityLogObserver, DisplayCounterObserver |
+
+## Project Structure
+
+```text
+src/main/java/org/example/
+├── Bridge/
+│   ├── Art/
+│   ├── Exhibition/
+│   ├── ObjectType/
+│   └── Price/
+├── Builder/
+│   └── ExhibitionBuilder.java
+├── Facade/
+├── Observer/
+│   ├── ArtworkAddedEvent.java
+│   ├── ArtworkObserver.java
+│   ├── ActivityLogObserver.java
+│   └── DisplayCounterObserver.java
+├── Strategy/
+├── Visitor/
+└── Main.java
+```
+
+## 1. Bridge Pattern
+
+**Category:** Structural
+
+Bridge separates an abstraction from its implementation, allowing both to change independently.
+
+### Implementation
+
+- `Exhibition` — abstraction.
+- `Gallery` and `Museum` — refined abstractions.
+- `IObjectFormat` — implementation interface.
+- `Physical` and `Virtual` — concrete implementations.
+
+An exhibition can change its presentation format without changing its type.
+
+### Example
+
+```java
+Gallery gallery = new Gallery(
+    new Painting("Starry Night"),
+    new Physical("Canvas"),
+    100,
+    new PriceUsd()
+);
+
+gallery.show();
+
+gallery.setFormat(
+    new Virtual("3D artwork model")
+);
+
+gallery.show();
+```
+
+### Benefits
+
+- Separates exhibition behavior from presentation details.
+- Supports both physical and virtual formats.
+- Avoids creating separate classes for every exhibition-format combination.
+- Makes new formats easier to introduce.
+
+## 2. Facade Pattern
+
+**Category:** Structural
+
+Facade provides a simplified interface to a more complex system.
+
+### Implementation
+
+The application contains three facade classes:
+
+- `GalleryFacade` — simplifies gallery operations.
+- `MuseumFacade` — simplifies museum operations.
+- `ArtCollectionFacade` — provides artwork collection operations.
+
+### Example
+
+```java
+ArtCollectionFacade collection =
+    new ArtCollectionFacade();
+
+collection.packAll();
+collection.showCatalog();
+collection.showConservationAdvice();
+```
+
+The client uses simple methods without manually managing artwork traversal or visitor objects.
+
+### Benefits
+
+- Simplifies interaction with the system.
+- Hides internal implementation details.
+- Reduces dependencies between client code and internal classes.
+- Provides convenient commands for common operations.
+
+## 3. Strategy Pattern
+
+**Category:** Behavioral
+
+Strategy allows the application to change pricing algorithms without modifying the gallery's main logic.
+
+### Implementation
+
+`IPricingStrategy` defines a common interface for pricing calculations.
+
+Concrete implementations include:
+
+- `RegularIPricing`
+- `DiscountIPricing`
+- `CommissionIPricing`
+- `FixedDiscountIPricing`
+
+### Example
+
+```java
+gallery.setPricingStrategy(
+    new DiscountIPricing(10)
+);
+
+gallery.show();
+```
+
+The gallery applies the selected strategy when calculating the final artwork price.
+
+### Benefits
+
+- Avoids large conditional statements for different pricing rules.
+- Makes pricing algorithms interchangeable.
+- Allows new pricing strategies to be added independently.
+- Supports the Open/Closed Principle.
+
+## 4. Visitor Pattern
+
+**Category:** Behavioral
+
+Visitor separates operations from the artwork classes on which they operate.
 
 ### Elements
 
 `IArt` declares the method for accepting a visitor:
 
 ```java
-void accept(ArtVisitor visitor);
+void accept(IArtVisitor visitor);
 ```
 
 The concrete elements are:
@@ -54,17 +200,17 @@ Each implements `accept()` by passing itself to the visitor:
 
 ```java
 @Override
-public void accept(ArtVisitor visitor) {
+public void accept(IArtVisitor visitor) {
     visitor.visit(this);
 }
 ```
 
 ### Visitor Interface
 
-`ArtVisitor` declares an overloaded method for each concrete element type:
+`IArtVisitor` declares an overloaded method for each concrete element type:
 
 ```java
-public interface ArtVisitor {
+public interface IArtVisitor {
     void visit(Painting painting);
     void visit(Sculpture sculpture);
 }
@@ -72,19 +218,17 @@ public interface ArtVisitor {
 
 ### Concrete Visitors
 
-Each visitor implements one operation across both artwork types.
-
 | Visitor | Operation |
 |---|---|
-| PackingVisitor | Prints type-specific packing instructions |
-| CatalogVisitor | Prints catalogue entries containing artwork type and title |
-| ConservationVisitor | Prints type-specific conservation recommendations |
+| PackingVisitor | Prints artwork-specific packing instructions |
+| CatalogVisitor | Prints catalogue entries |
+| ConservationVisitor | Prints conservation recommendations |
 
 These operations print educational example information to the console.
 
 ### Object Structure
 
-`ArtCollectionFacade` stores a collection containing both paintings and sculptures:
+`ArtCollectionFacade` stores a collection containing both paintings and sculptures.
 
 ```java
 private final List<IArt> artworks;
@@ -92,199 +236,425 @@ private final List<IArt> artworks;
 
 Its constructor creates the collection using `List.of()`.
 
-The private traversal method applies a visitor to every element:
+A private traversal method applies a visitor to every element:
 
 ```java
-private void applyVisitor(ArtVisitor visitor) {
+private void applyVisitor(IArtVisitor visitor) {
     for (IArt artwork : artworks) {
         artwork.accept(visitor);
     }
 }
 ```
 
-The collection is separate from the artwork objects held by `GalleryFacade`
-and `MuseumFacade`.
+The collection is separate from the artwork objects held by `GalleryFacade` and `MuseumFacade`.
 
-### Client Usage
+The updated `Exhibition` class also supports applying a visitor to all artworks within an exhibition.
 
-`Main` uses the facade's public commands:
+### Double Dispatch
 
-```java
-ArtCollectionFacade collection = new ArtCollectionFacade();
-
-collection.packAll();
-collection.showCatalog();
-collection.showConservationAdvice();
-```
-
-Object creation and collection traversal are encapsulated inside the facade.
-
-## Double Dispatch
-
-Consider an `IArt` reference holding a `Painting` object:
+Consider an `IArt` reference holding a `Painting`:
 
 ```java
 IArt artwork = new Painting("Starry Night");
-ArtVisitor visitor = new PackingVisitor();
+IArtVisitor visitor = new PackingVisitor();
 
 artwork.accept(visitor);
 ```
 
 The call proceeds as follows:
 
-1. Runtime dispatch selects `Painting.accept()` based on the actual element object.
-2. Inside `Painting.accept()`, `this` has the compile-time type `Painting`,
-   so overload resolution selects `visit(Painting)`.
-3. Runtime dispatch selects `PackingVisitor`'s implementation of that method.
+1. Java selects `Painting.accept()` using the runtime type of the artwork.
+2. Inside `Painting.accept()`, `this` has the type `Painting`, so `visit(Painting)` is selected.
+3. Java executes the corresponding implementation in `PackingVisitor`.
 
-The resulting operation therefore depends on both the concrete element type
-and the concrete visitor type.
+The operation therefore depends on both the concrete artwork type and the concrete visitor type.
 
-No `instanceof`, casts, or type-checking chains are needed to select the operation.
+No `instanceof` checks or casting chains are required.
 
-## Expected Visitor Output
+### Benefits
 
-```text
-Painting: protect the frame and use a flat crate.
-Sculpture: secure the base and use a rigid crate.
+- Separates artwork data from operations.
+- Makes new operations easy to add.
+- Reuses traversal logic.
+- Avoids repeating type-checking conditions.
 
-Catalog | Painting | Starry Night
-Catalog | Sculpture | David
+A limitation is that introducing a new artwork type requires updating the visitor interface and concrete visitors.
 
-Starry Night: protect from direct sunlight.
-David: check the stability of the base.
-```
+## 5. Builder Pattern
 
-Other exhibition output may appear before these lines.
+**Category:** Creational
 
-Packing and conservation instructions refer to the physical artwork,
-independently of its current presentation format.
+Builder provides a structured way to create exhibitions with multiple artworks and optional configuration settings.
 
-## Clean Code Principles
+### Implementation
 
-### 1. Meaningful Names
+`ExhibitionBuilder` constructs `Gallery` objects using method chaining.
 
-Names communicate responsibilities:
+Required information:
 
-- `ArtVisitor` defines artwork operations.
-- `PackingVisitor` contains packing instructions.
-- `CatalogVisitor` produces catalogue entries.
-- `ConservationVisitor` provides conservation advice.
-- `ArtCollectionFacade` exposes collection commands.
+- Exhibition title
+- At least one artwork
 
-The distinction between elements and visitors is visible in their names.
+Optional settings:
 
-### 2. Single Responsibility Principle
+- Presentation format
+- Currency formatter
+- Pricing strategy
+- Base price
 
-Each concrete visitor represents one operation across all supported element types.
+Default values are provided for optional settings.
 
-Packing rules belong to `PackingVisitor`, catalogue rules to `CatalogVisitor`,
-and conservation rules to `ConservationVisitor`.
-
-A change to packing instructions does not require changing catalogue logic.
-
-### 3. Polymorphism Instead of Type Checks
-
-The traversal calls:
+### Example
 
 ```java
-artwork.accept(visitor);
+Gallery exhibition = new ExhibitionBuilder()
+    .title("Modern Masterpieces")
+    .addArtwork(new Painting("Sunflowers"))
+    .addArtwork(new Sculpture("The Thinker"))
+    .format(new Virtual("Interactive 3D exhibition"))
+    .currency(new PriceKzt())
+    .basePriceUsd(2000)
+    .pricingStrategy(new DiscountIPricing(10))
+    .build();
 ```
 
-It does not inspect whether the element is a painting or sculpture.
+### How It Works
 
-The `accept()` and `visit()` methods route execution to the appropriate operation.
+1. A new `ExhibitionBuilder` object is created.
+2. `title()` sets the exhibition title.
+3. `addArtwork()` collects the artworks.
+4. Optional methods configure presentation and pricing.
+5. Each configuration method returns `this`, allowing method chaining.
+6. `build()` validates the required fields and creates a `Gallery`.
 
-### 4. Encapsulation
+### Validation
 
-Visitors obtain artwork titles through `getTitle()` methods.
+The Builder rejects:
 
-No public fields or title setters were added for Visitor. Visitors do not directly
-access the existing protected fields in the artwork classes.
+- Missing or blank exhibition titles.
+- Exhibitions without artworks.
+- Null artwork objects.
+- Negative or non-finite base prices.
+- Null optional configuration objects.
 
-The collection is stored in a private final field. `List.of()` prevents adding
-or removing list elements, although it does not make the contained objects immutable.
+The `build()` method prevents creating an exhibition without a valid title or at least one artwork.
 
-### 5. Open/Closed Principle for New Operations
+### Independent Construction
 
-`ConservationVisitor` demonstrates adding a third operation without changing:
+The Builder creates a copy of the artwork list when constructing an exhibition.
+
+This prevents future additions to the Builder from automatically changing previously created exhibitions.
+
+### Benefits
+
+- Avoids long constructor calls in client code.
+- Makes object creation easier to read.
+- Centralizes construction logic and validation.
+- Supports optional settings.
+- Integrates with the existing Bridge and Strategy patterns.
+
+## 6. Observer Pattern
+
+**Category:** Behavioral
+
+Observer establishes a one-to-many relationship between an exhibition and its listeners.
+
+Whenever a new artwork is added, the exhibition notifies all registered observers.
+
+### Implementation
+
+The Observer package contains four components:
+
+**ArtworkObserver**
+
+Defines the common listener interface:
+
+```java
+public interface ArtworkObserver {
+    void onArtworkAdded(ArtworkAddedEvent event);
+}
+```
+
+**ArtworkAddedEvent**
+
+Stores information about an artwork addition:
+
+- Exhibition title
+- Added artwork
+- Updated artwork count
+
+**ActivityLogObserver**
+
+Records received artwork-added events in an internal list and prints notifications.
+
+**DisplayCounterObserver**
+
+Tracks the current number of artworks and updates its count when it receives an event.
+
+The `Exhibition` class acts as the subject or publisher.
+
+### Registering Observers
+
+```java
+ActivityLogObserver log =
+    new ActivityLogObserver();
+
+DisplayCounterObserver counter =
+    new DisplayCounterObserver(
+        exhibition.getArtworkCount()
+    );
+
+exhibition.registerObserver(log);
+exhibition.registerObserver(counter);
+```
+
+Both observers are registered with the same exhibition.
+
+### Publishing an Event
+
+```java
+exhibition.addArtwork(
+    new Painting("Water Lilies")
+);
+```
+
+When an artwork is added:
+
+1. The exhibition validates the artwork.
+2. The artwork is added to the collection.
+3. An `ArtworkAddedEvent` is created.
+4. The exhibition notifies each registered observer.
+5. The activity log records the event.
+6. The counter updates the artwork count.
+
+### Removing an Observer
+
+```java
+exhibition.removeObserver(log);
+```
+
+After removal, the activity logger no longer receives notifications.
+
+The counter remains subscribed and continues updating.
+
+### Expected Output
+
+```text
+Activity log: artwork added to 'Modern Masterpieces'
+Display counter: 3 artwork(s)
+Artworks after addition: 3
+Display counter: 4 artwork(s)
+Log entries after unregistering logger: 1
+```
+
+### Benefits
+
+- Reduces coupling between exhibitions and listeners.
+- Supports multiple independent reactions to the same event.
+- Allows observers to subscribe and unsubscribe.
+- Makes additional observers easier to introduce.
+- Supports the Dependency Inversion Principle.
+
+## Pattern Integration
+
+All six patterns are integrated into the same art exhibition application.
+
+Builder creates a gallery exhibition using existing Bridge abstractions and a pricing Strategy.
+
+The exhibition stores artworks that can be processed using Visitor.
+
+Observer allows the exhibition to notify listeners when new artworks are added.
+
+Facade provides simplified operations for the gallery, museum, and artwork collection.
+
+`Main.java` demonstrates the patterns through a console application.
+
+### Example Integration
+
+```java
+Gallery exhibition = new ExhibitionBuilder()
+    .title("Modern Masterpieces")
+    .addArtwork(new Painting("Sunflowers"))
+    .addArtwork(new Sculpture("The Thinker"))
+    .format(new Virtual("Interactive 3D exhibition"))
+    .currency(new PriceKzt())
+    .basePriceUsd(2000)
+    .pricingStrategy(new DiscountIPricing(10))
+    .build();
+
+ActivityLogObserver log =
+    new ActivityLogObserver();
+
+DisplayCounterObserver counter =
+    new DisplayCounterObserver(
+        exhibition.getArtworkCount()
+    );
+
+exhibition.registerObserver(log);
+exhibition.registerObserver(counter);
+
+exhibition.show();
+
+exhibition.addArtwork(
+    new Painting("Water Lilies")
+);
+
+System.out.println(counter.getCount());
+
+exhibition.removeObserver(log);
+```
+
+This demonstrates how the Builder, Bridge, Strategy, and Observer patterns cooperate within one exhibition.
+
+## Clean Code and SOLID Principles
+
+### 1. Single Responsibility Principle
+
+Each class has a focused responsibility.
+
+- `ExhibitionBuilder` constructs exhibitions.
+- `ActivityLogObserver` records artwork additions.
+- `DisplayCounterObserver` tracks artwork counts.
+- Pricing Strategy implementations calculate prices.
+- Visitor implementations perform specific artwork operations.
+
+### 2. Open/Closed Principle
+
+The system can be extended by introducing new pricing strategies, presentation formats, visitors, and observers without rewriting their existing client interfaces.
+
+### 3. Liskov Substitution Principle
+
+Gallery and Museum objects can be used through the shared `Exhibition` abstraction while retaining their specialized behavior.
+
+Concrete pricing strategies can be used through `IPricingStrategy`.
+
+### 4. Interface Segregation Principle
+
+Small interfaces define specific responsibilities:
 
 - `IArt`
-- `Painting`
-- `Sculpture`
-- `ArtVisitor`
-- The existing collection traversal
+- `IObjectFormat`
+- `IPrice`
+- `IPricingStrategy`
+- `IArtVisitor`
+- `ArtworkObserver`
 
-A convenience method was added to the facade and called from `Main`.
+Classes do not need to implement unrelated operations.
 
-This extensibility applies to new operations. Adding a new element type requires
-updating the visitor interface and every concrete visitor.
+### 5. Dependency Inversion Principle
 
-### 6. Avoiding Duplication
+High-level components communicate through abstractions.
 
-The private `applyVisitor()` method contains the collection traversal once.
+For example, `Exhibition` stores `ArtworkObserver` references instead of depending directly on `ActivityLogObserver` or `DisplayCounterObserver`.
 
-All three public collection commands reuse this method rather than repeating
-the loop.
+Similarly, `Gallery` uses `IPricingStrategy` instead of depending on one pricing algorithm.
 
-## Assignment 6 Requirements Mapping
+### 6. DRY — Don't Repeat Yourself
 
-| Requirement | Implementation |
+Common artwork traversal is implemented in reusable methods.
+
+Pricing algorithms are separated into Strategy classes instead of repeated throughout the gallery code.
+
+Observer notification logic is centralized in `Exhibition.addArtwork()`.
+
+### 7. KISS — Keep It Simple
+
+The application uses small classes and straightforward interfaces.
+
+Builder simplifies exhibition creation, while Facade simplifies client operations.
+
+The application remains a console demonstration without unnecessary graphical-interface complexity.
+
+### 8. Encapsulation
+
+Exhibition data is stored in private fields.
+
+`getArtworks()` returns a read-only list copy.
+
+Observer event collections are also returned through read-only copies.
+
+This prevents callers from directly modifying internal collections.
+
+## Automated Testing
+
+JUnit 5 tests are implemented in:
+
+`src/test/java/org/example/PatternIntegrationTest.java`
+
+Six tests cover the following behaviors:
+
+| Test | Purpose |
 |---|---|
-| Element interface declaring accept() | IArt |
-| At least two concrete elements | Painting and Sculpture |
-| Matching visitor call with the element itself | visitor.visit(this) in each concrete element |
-| Visitor method for every concrete element type | ArtVisitor |
-| At least two concrete visitors | PackingVisitor, CatalogVisitor and ConservationVisitor |
-| Collection traversed using accept() | artworks collection and applyVisitor() in ArtCollectionFacade |
-| At least five justified Clean Code principles | Clean Code section above |
-| Demonstration of a third visitor | ConservationVisitor |
+| builderRequiresTitle | Rejects exhibitions without titles |
+| builderRequiresArtwork | Rejects exhibitions without artworks |
+| builderRejectsInvalidPrice | Rejects negative and NaN prices |
+| builderCreatesIndependentExhibitions | Ensures built exhibitions remain independent |
+| observersReceiveEventsAndCanUnsubscribe | Tests registration, notifications, and removal |
+| rejectedArtworkDoesNotCreateEvent | Ensures null artwork additions do not publish events |
 
-## Extending the Application
+Run the tests using:
 
-### Adding a New Operation
+```bash
+mvn clean test
+```
 
-For example, to add a restoration report:
-
-1. Create `RestorationVisitor implements ArtVisitor`.
-2. Implement `visit(Painting)` and `visit(Sculpture)`.
-3. Add a public facade command that passes it to `applyVisitor()`.
-4. Call the command from the client.
-
-The element classes and existing visitors remain unchanged.
-
-### Adding a New Element Type
-
-For example, to add `Photograph`:
-
-1. Create `Photograph implements IArt`.
-2. Implement its `accept()` method.
-3. Add `visit(Photograph)` to `ArtVisitor`.
-4. Implement that method in every concrete visitor.
-5. Add photographs to the collection where required.
-
-Updating all visitors is the main trade-off of the Visitor pattern.
+A successful run should report zero test failures and errors.
 
 ## Verification Checklist
 
-After applying the implementation:
+Verify the following before submission:
 
-- Compile and run `Main`.
-- Confirm that both artwork types receive packing instructions.
-- Confirm that catalogue entries contain the correct titles.
-- Confirm that conservation advice differs by artwork type.
-- Confirm that existing exhibition and pricing demonstrations still run.
-- Confirm that Visitor uses no type-checking chains.
+- All six design patterns are implemented.
+- All three required pattern categories are represented.
+- Java source code compiles successfully.
+- Existing Bridge, Facade, Strategy, and Visitor operations work.
+- Builder creates exhibitions containing multiple artworks.
+- Builder validates required information.
+- Optional Builder settings work.
+- Observer notifications are delivered.
+- Removed observers stop receiving notifications.
+- Artwork counters update correctly.
+- Automated tests pass.
+- Main demonstrates the integrated application.
+- Git commits record the implemented changes.
 
 ## Limitations
 
-- Artwork data is created in memory.
-- Visitor operations print results to the console.
-- The application does not generate catalogue files or perform physical packing.
-- Visitor is most suitable when artwork types are stable and new operations
-  are added more frequently than new element types.
+- Artwork information is stored in memory rather than a database.
+- Exhibitions are created programmatically.
+- The application uses console output rather than a graphical interface.
+- The Observer implementation currently handles artwork-added events only.
+- Artwork sales statuses such as sold or reserved are not implemented.
+- Visitor operations provide example instructions rather than performing physical operations.
+- Exhibition information is not saved between application runs.
 
-## Author
+## Future Improvements
 
-Zhasmina Ziyakhmetova  
-Group: SE-2509
+Possible extensions include:
+
+- An interactive CLI menu for creating and managing exhibitions.
+- Saving exhibitions and artworks in a database.
+- Supporting artwork availability states such as available, reserved, and sold.
+- Publishing additional Observer events when artwork statuses change.
+- Implementing a graphical interface.
+- Exporting exhibition catalogues and activity logs.
+- Supporting additional artwork types and pricing rules.
+
+## Conclusion
+
+The project demonstrates the practical use of six design patterns in a single Java art exhibition application.
+
+Bridge separates exhibitions from presentation formats. Facade simplifies system operations. Strategy enables interchangeable pricing algorithms. Visitor supports different artwork operations. Builder simplifies exhibition construction, and Observer provides event-based communication.
+
+Together, these patterns improve modularity, extensibility, code organization, and maintainability.
+
+## Contributors
+
+### Original Project
+Zhasmina Ziyakhmetova — Bridge, Facade,
+Strategy, and Visitor patterns.
+
+### Final Examination Contributions
+Aknur — Builder and Observer patterns,
+multi-artwork exhibition support,
+pattern integration, and JUnit tests.
